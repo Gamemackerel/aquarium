@@ -110,5 +110,15 @@ services:
       - s3
       - createbucket
 
+  ola_image_processing:
+    ports:
+      - "5000:5000"
+    networks:
+      - aquarium_net
+    environment:
+      TZ: America/Los_Angeles
+    command: "python3 api.py"
+
+
 networks:
   aquarium_net:

@@ -19,14 +19,6 @@ from skimage.transform import rotate
 from skimage.filters import threshold_isodata
 from skimage.measure import label, regionprops
 
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from matplotlib import gridspec
-import matplotlib.mlab as mlab
-
-
-DEBUG = False
-
 BOXH, BOXW = 3, 4 # constants scaling ttest box height and height
 
 BAND_THRESHOLD = 1.5 #tstat value to recognize band
@@ -40,7 +32,7 @@ BANDS_TO_CALL = {
 }
 
 def make_calls_from_tstats(strips_tstats):
-    return [list(map(lambda tstat : tstat > BAND_THRESHOLD, strip_tstats)) 
+    return [BANDS_TO_CALL[tuple(map(lambda tstat : tstat > BAND_THRESHOLD, strip_tstats))] 
             for strip_tstats in strips_tstats]
      
 
@@ -53,16 +45,9 @@ def process_image_from_file(file, trimmed=True):
     if any(file.filename.lower().endswith(fmt) for fmt in formats):
 
         image = io.imread(file)
-
-        if DEBUG: # DEBUGGING VISUALIZATION
-                plt.imshow(image)
-                plt.show()
             
         if not trimmed:
             image = trim(image)
-            if DEBUG: # DEBUGGING VISUALIZATION
-                plt.imshow(image)
-                plt.show()
         strips = detect_strips(image)
         tstats = [extract_tstats(strip) for strip in strips]
 
@@ -86,16 +71,9 @@ def process_strip(filepath, trimmed=True):
         if any(filepath.lower().endswith(fmt) for fmt in formats):
             
             strip = io.imread(filepath)
-
-            if DEBUG: # DEBUGGING VISUALIZATION
-                plt.imshow(strip)
-                plt.show()
             
             if not trimmed:
                 strip = find_strip(strip)
-                if DEBUG: # DEBUGGING VISUALIZATION
-                    plt.imshow(strip)
-                    plt.show()
             return extract_tstats(strip)
 
 
@@ -180,28 +158,6 @@ def find_strip(cropped):
 
     margin = (e - w) // 8
     strip = cropped[n+margin:s-margin*2, w+margin:e-margin]
-    
-    if DEBUG: # DEBUGGING VISUALIZATION
-        gs = gridspec.GridSpec(1,4, width_ratios=[5, 5, 5, 2])
-
-        plt.subplot(gs[0])
-        plt.imshow(cropped / 255)
-        plt.scatter([w, e, w, e], [n, n, s, s])
-
-        plt.subplot(gs[1])
-        plt.gca().set_axis_off()
-        plt.imshow(combo)
-
-        plt.subplot(gs[2])
-        plt.gca().set_axis_off()
-        plt.imshow(weighted)
-        plt.scatter([cx], [cy])
-
-        plt.subplot(gs[3])
-        plt.gca().set_axis_off()
-        plt.imshow(strip/255)
-
-        plt.show()
 
     return strip
 
@@ -301,26 +257,6 @@ def select_bands(signal, maxima):
     
         bands = band1, band2, band3
         
-        if DEBUG: # DEBUGGING VISUALIZATION
-            plt.figure(figsize=(15, 4))
-            plt.plot(signal, label='signal')
-               
-            band_locs_x, band_locs_y = [m[0] for m in bands], [m[1] for m in bands]
-            plt.plot(band_locs_x, band_locs_y, '+', ms=20, label='bands')
-               
-            band_locs_x, band_locs_y = [m[0] for m in maxima], [m[1] for m in maxima]
-            plt.plot(band_locs_x, band_locs_y, 'o', label='maxima')
-               
-            minyup = min(signal)
-            maxyup = max(signal)
-            xyup = [0, div0, div0, div1, div1, div2, div2, div3, div3, len(signal)]
-            yyup = [minyup, minyup, maxyup, maxyup] * 2 + [minyup, minyup]
-            plt.plot(xyup, yyup)
-            
-            plt.legend()
-            plt.tight_layout()
-            plt.show()
-        
         cond1 = (band2[1] - min(signal)) > 1.5 * (band1[1] - min(signal))
         cond2 = (band2[1] - min(signal)) > (band1[1] - min(signal))
         if fish >= 3:
@@ -353,81 +289,6 @@ def extract_regions(strip, band_locs):
     bgr1 = strip[bg1-BOXH:bg1+BOXH,BOXW:w-BOXW]
     bgr2 = strip[bg2-BOXH:bg2+BOXH,BOXW:w-BOXW]
     bgr3 = strip[bg3-BOXH:bg3+BOXH,BOXW:w-BOXW]
-    
-    if DEBUG: # DEBUGGING VISUALIZATION
-       vmin = min(strip.flatten())
-       vmax = max(strip.flatten())
-           
-       ax = plt.subplot(121)
-       im = plt.imshow(strip)
-    
-       ax.text(w + 5, bl1, "CTRL", ha="left", va="center",)
-       ax.add_patch(patches.Rectangle((BOXW, bl1-BOXH),
-                                       w-2*BOXW, 2*BOXH,
-                                       edgecolor="#ff0000", fill=False))
-    
-       ax.text(w + 5, bg1, "CTRL-bg", ha="left", va="center",)
-       ax.add_patch(patches.Rectangle((BOXW, bg1-BOXH),
-                                       w-2*BOXW, 2*BOXH,
-                                       edgecolor="#ffff00", fill=False))
-    
-       ax.text(w + 5, bl2, "WT", ha="left", va="center",)
-       ax.add_patch(patches.Rectangle((BOXW, bl2-BOXH),
-                                       w-2*BOXW, 2*BOXH,
-                                       edgecolor="#ff0000", fill=False))
-    
-       ax.text(w + 5, bg2, "WT-bg", ha="left", va="center",)
-       ax.add_patch(patches.Rectangle((BOXW, bg2-BOXH),
-                                       w-2*BOXW, 2*BOXH,
-                                       edgecolor="#ffff00", fill=False))
-    
-       ax.text(w + 5, bl3, "MUT", ha="left", va="center",)
-       ax.add_patch(patches.Rectangle((BOXW, bl3-BOXH),
-                                       w-2*BOXW, 2*BOXH,
-                                       edgecolor="#ff0000", fill=False))
-    
-       ax.text(w + 5, bg3, "MUT-bg", ha="left", va="center",)
-       ax.add_patch(patches.Rectangle((BOXW, bg3-BOXH),
-                                       w-2*BOXW, 2*BOXH,
-                                       edgecolor="#ffff00", fill=False))
-    
-    
-       plt.subplot(6,2,2)
-       plt.imshow(r1, vmin=vmin, vmax=vmax)
-       plt.ylabel('CRTL')
-       plt.tick_params(bottom='off', left='off', labelbottom='off', labelleft='off')
-    
-       plt.subplot(6,2,4)
-       plt.imshow(bgr1, vmin=vmin, vmax=vmax)
-       plt.ylabel('CRTL-bg')
-       plt.tick_params(bottom='off', left='off', labelbottom='off', labelleft='off')
-    
-       plt.subplot(6,2,6)
-       plt.imshow(r2, vmin=vmin, vmax=vmax)
-       plt.ylabel('WT')
-       plt.tick_params(bottom='off', left='off', labelbottom='off', labelleft='off')
-    
-       plt.subplot(6,2,8)
-       plt.imshow(bgr2, vmin=vmin, vmax=vmax)
-       plt.ylabel('WT-bg')
-       plt.tick_params(bottom='off', left='off', labelbottom='off', labelleft='off')
-    
-       plt.subplot(6,2,10)
-       plt.imshow(r3, vmin=vmin, vmax=vmax)
-       plt.ylabel('MUT')
-       plt.tick_params(bottom='off', left='off', labelbottom='off', labelleft='off')
-    
-       plt.subplot(6,2,12)
-       plt.imshow(bgr3, vmin=vmin, vmax=vmax)
-       plt.ylabel('MUT-bg')
-       plt.tick_params(bottom='off', left='off', labelbottom='off', labelleft='off')
-    
-       fig = plt.gcf()
-       fig.subplots_adjust(right=0.8)
-       cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-       fig.colorbar(im, cax=cbar_ax)
-    
-       plt.show()
 
     return r1, bgr1, r2, bgr2, r3, bgr3
 
@@ -444,48 +305,5 @@ def ttest(regions):
 
     ssss3 = np.sqrt(np.std(r3)**2 + np.std(bgr3)**2)
     tstat3 = (np.mean(r3) - np.mean(bgr3)) / ssss3
-    
-    if DEBUG:
-
-       mu1, sigma1 = np.mean(r1), np.std(r1)
-       mu1br, sigma1br = np.mean(bgr1), np.std(bgr1)
-       mu2, sigma2 = np.mean(r2), np.std(r2)
-       mu2br, sigma2br = np.mean(bgr2), np.std(bgr2)
-       mu3, sigma3 = np.mean(r3), np.std(r3)
-       mu3br, sigma3br = np.mean(bgr3), np.std(bgr3)
-
-       plt.figure(figsize=(17, 4))
-
-       plt.subplot(1,3,1)
-       n, bins, patches = plt.hist(r1, 50, normed=1, facecolor='red', alpha=0.2)
-       y = mlab.normpdf(bins, mu1, sigma1)
-       plt.plot(bins, y, 'r--', linewidth=1, label='CTRL')
-       n, bins, patches = plt.hist(bgr1, 50, normed=1, facecolor='blue', alpha=0.2)
-       y = mlab.normpdf(bins, mu1br, sigma1br)
-       plt.plot(bins, y, 'b--', linewidth=1, label='CTRL-bg')
-       plt.legend()
-
-
-       plt.subplot(1,3,2)
-       n, bins, patches = plt.hist(r2, 50, normed=1, facecolor='red', alpha=0.2)
-       y = mlab.normpdf(bins, mu2, sigma2)
-       plt.plot(bins, y, 'r--', linewidth=1, label='WT')
-       n, bins, patches = plt.hist(bgr2, 50, normed=1, facecolor='blue', alpha=0.2)
-       y = mlab.normpdf(bins, mu2br, sigma2br)
-       plt.plot(bins, y, 'b--', linewidth=1, label='WT-bg')
-       plt.legend()
-
-
-       plt.subplot(1,3,3)
-       n, bins, patches = plt.hist(r3, 50, normed=1, facecolor='red', alpha=0.2)
-       y = mlab.normpdf(bins, mu3, sigma3)
-       plt.plot(bins, y, 'r--', linewidth=1, label='MUT')
-       n, bins, patches = plt.hist(bgr3, 50, normed=1, facecolor='blue', alpha=0.2)
-       y = mlab.normpdf(bins, mu3br, sigma3br)
-       plt.plot(bins, y, 'b--', linewidth=1, label='MUT-bg')
-       plt.legend()
-
-       plt.show()
-
 
     return tstat1, tstat2, tstat3
