@@ -34,25 +34,19 @@ BANDS_TO_CALL = {
 def make_calls_from_tstats(strips_tstats):
     return [BANDS_TO_CALL[tuple(map(lambda tstat : tstat > BAND_THRESHOLD, strip_tstats))] 
             for strip_tstats in strips_tstats]
-     
 
 def process_image_from_file(file, trimmed=True):
     '''processes the given image file 
     returns the tstats for each band for each strip 
     if trimmed flag is false, attempts to isolate only the paper strip'''
 
-    formats = ['.jpg', '.png', '.tif', '.tiff']
-    if any(file.filename.lower().endswith(fmt) for fmt in formats):
+    image = io.imread(file)
+    if not trimmed:
+        image = trim(image)
+    strips = detect_strips(image)
+    tstats = [extract_tstats(strip) for strip in strips]
 
-        image = io.imread(file)
-            
-        if not trimmed:
-            image = trim(image)
-        strips = detect_strips(image)
-        tstats = [extract_tstats(strip) for strip in strips]
-
-        return tstats
-
+    return tstats
 
 def process_strip(filepath, trimmed=True):
     '''processes the given image file or all images in the given filepath

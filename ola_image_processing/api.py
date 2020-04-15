@@ -3,7 +3,7 @@ from flask import request, jsonify, Response
 
 import json
 import olaip
-
+import inspect
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -18,12 +18,16 @@ def home():
 
 @app.route('/api/processimage', methods=['POST'])
 def process():
+    
     file = request.files['file']
 
-    tstats = olaip.process_image_from_file(file, trimmed=False)    
-    results = olaip.make_calls_from_tstats(tstats)
-    response = jsonify(results=results)
-
+    try:
+        tstats = olaip.process_image_from_file(file, trimmed=False)    
+        results = olaip.make_calls_from_tstats(tstats)
+        response = jsonify(results=results)
+    except:
+        response = jsonify(error='API ERROR: couldnt analyze the file. Be sure file is in a common format like jpg.')
+    
     return response
 
 
