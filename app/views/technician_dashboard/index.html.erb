@@ -2,11 +2,11 @@
 <%= render partial: 'operation_list' %> 
 <%= render partial: '/operations/operation_list_report' %>
 
-<% provide(:title, 'Technician') %>
+<% provide(:title, 'Manager') %>
 
 <%= content_for :class do %>operations<% end %>
 
-<%= content_for :controller do %>technicianDashboard<% end %>
+<%= content_for :controller do %>operationsCtrl<% end %>
 
 <% content_for :much_wider_sidebar do %>
   true
