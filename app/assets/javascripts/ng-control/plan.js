@@ -472,7 +472,7 @@
 
         $scope.clear_multiselect();
 
-        AQ.Plan.load(plan.id).then(p => {
+        return AQ.Plan.load(plan.id).then(p => {
           Module.next_module_id = temp1;
           ModuleIO.next_io_id = temp2;
           $scope.plan.paste_plan(p, $scope.last_place);
@@ -652,6 +652,24 @@
           });
         }
       };
+
+      // Added for OLASimple aquarium
+      // launch a template by applying the given params array
+      // to the respective input field values of the first operation
+      // Returns launch promise
+      $scope.launch_ready_template = function(template_idx, params) {
+        p = $scope.system_templates[template_idx];
+        $scope.new();
+        return $scope.paste_plan(p).then(() => {
+          $scope.plan.name = p.name + " - Autolaunch"
+          let leaves = $scope.plan.leaves;
+          for (var i = 0; i < leaves.length; i++) {
+            leaves[i].value = params[i]
+          }
+          $scope.save($scope.plan)
+          $scope.launch()
+        });
+      }
 
       // Inventory ////////////////////////////////////////////////////////////////////////////////////
 

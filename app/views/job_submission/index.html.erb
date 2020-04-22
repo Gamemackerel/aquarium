@@ -1,28 +1,8 @@
 <% provide(:title,  "New Job" ) %>
 
-<% content_for :controller do %>jobSubmissionCtrl<% end %>
-<% content_for :class do %>jobSubmission<% end %>
+<% content_for :controller do %>planCtrl<% end %>
+<% content_for :class do %>plans launcher<% end %>
 
-<% content_for :specific_title do %>
-  <div style="width: 100%">
-  <span ng-if="plan.id" id="plan_id">{{plan.id}}: </span>
-  <input ng-if="ready"
-         type=text 
-         class="plan-name-input" 
-         ng-model="plan.name"
-         id="plan-title-input">
-  <span ng-if="plan.current_module.id !=0" 
-        ng-repeat="mod_name in plan.path_to_current_module() track by $index">
-    &rang; {{mod_name}}
-  </span>
-  </div>
-<% end %>
-
-<% content_for :sidebar do %>
-  <div ng-if="ready">
-    <%= render partial: 'sidebar' %>
-  </div>
-<% end %>
 
 <% content_for :no_specific_padding do %>true<% end %>
 
@@ -34,6 +14,18 @@
       <div flex="34"></div>
       <div flex="66">
         <br /><br />
+        <h2 class="md-title">Loading...</h2>
+        <md-progress-linear md-mode="indeterminate"></md-progress-linear>
+        <br />
+      </div>
+    </div>
+  </div>  
+
+  <div flex layout-padding ng-if="ready">
+    <div layout="row">
+      <div flex="34"></div>
+      <div flex="66">
+        <br /><br />
         <h2 class="md-title">Hello</h2>
         <p>
           I see this page as a spot where people can submit ola simple jobs using two text boxes and a barcode scanner. Once submitted and launched from template, the plan will undergo one 'debug' action which runs the submit-job protocol and gets everything ready to go.
@@ -41,6 +33,11 @@
 
           Maybe this page also shows the completed jobs and extracts the results out, displaying them in a list to the same person-role who submits the jobs.
         </p>
+        <button
+          ng-click="launch_ready_template(0, [5, 10])"
+        >
+          BUTTON
+        </button>
         <br />
       </div>
     </div>
