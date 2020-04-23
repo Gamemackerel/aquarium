@@ -11,7 +11,6 @@ AQ.User.record_getters.url = function() {
 }
 
 AQ.User.record_getters.user_budget_associations = function() {
-
   var user = this;
 
   delete user.user_budget_associations;
@@ -22,7 +21,6 @@ AQ.User.record_getters.user_budget_associations = function() {
   });
 
   return user.user_budget_associations;
-
 }
 
 AQ.User.active_users = function() {

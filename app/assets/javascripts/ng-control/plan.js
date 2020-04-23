@@ -395,10 +395,10 @@
         }
       };
 
-      function switch_plan() {
+      function switch_plan(careful) {
         return new Promise(function(resolve, reject) {
           // TODO: change to depend on whether plan is changed
-          if ($scope.plan.operations.length > 0) {
+          if ($scope.plan.operations.length > 0 && careful) {
             var dialog = $mdDialog
               .confirm()
               .title("Switch plans?")
@@ -463,7 +463,7 @@
       };
 
       $scope.load = function(plan) {
-        switch_plan().then(() => load_aux(plan));
+        switch_plan(true).then(() => load_aux(plan));
       };
 
       $scope.paste_plan = function(plan) {
@@ -482,8 +482,8 @@
         });
       };
 
-      $scope.new = function() {
-        switch_plan().then(() => {
+      $scope.new = function(careful) {
+        switch_plan(careful).then(() => {
           AQ.User.current()
             .then(user => {
               $scope.current_user = user;
@@ -654,20 +654,36 @@
       };
 
       // Added for OLASimple aquarium
-      // launch a template by applying the given params array
+      // launch a system template by applying the given params array
       // to the respective input field values of the first operation
-      // Returns launch promise
-      $scope.launch_ready_template = function(template_idx, params) {
+      $scope.launch_ready_template = function(template_idx, budget_id, params) {
+        $scope.state.launch = true;
         p = $scope.system_templates[template_idx];
-        $scope.new();
-        return $scope.paste_plan(p).then(() => {
+        $scope.new(false);
+        return $scope.paste_plan(p)
+        .then(() => {
           $scope.plan.name = p.name + " - Autolaunch"
           let leaves = $scope.plan.leaves;
           for (var i = 0; i < leaves.length; i++) {
             leaves[i].value = params[i]
           }
-          $scope.save($scope.plan)
-          $scope.launch()
+          return $scope.plan.save($scope.current_user)
+        })
+        .then(saved_plan => {
+          $scope.plan = saved_plan;
+          $scope.plan.uba = {budget_id: budget_id}
+          if ($scope.plan.valid()) {
+            $scope.submit_plan();
+            $scope.state.message = "Submitted plan " + $scope.plan.id 
+          } else {
+            $scope.state.message =
+              "Could not launch plan, because one or more inputs " +
+              "or outputs was found to be invalid after saving.";
+          }
+        })
+        .finally(() => {
+          $scope.state.launch = false;
+          $scope.new(false);
         });
       }
 
