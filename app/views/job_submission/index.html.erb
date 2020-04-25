@@ -1,4 +1,4 @@
-<% provide(:title,  "New Job" ) %>
+<% provide(:title,  "OLASimple Sample Ingestion" ) %>
 
 <% content_for :controller do %>planCtrl<% end %>
 <% content_for :class do %>plans launcher<% end %>
@@ -25,23 +25,35 @@
     <div layout="row">
       <div flex="34"></div>
       <div flex="66">
-        <br /><br />
+        <h4>
+          Initiate OLASimple Job
+        </h4>
         <p>
-          I see this page as a spot where people can submit ola simple jobs using two text boxes and a barcode scanner. Once submitted and launched from template, the plan will undergo one 'debug' action which runs the submit-job protocol and gets everything ready to go.
-
-
-          Maybe this page also shows the completed jobs and extracts the results out, displaying them in a list to the same person-role who submits the jobs.
+          
         </p>
-
-        <button 
-          class="md-raised md-button ng-scope md-ink-ripple"
-          type="button"
-          aria-label="Click"
-          ng-click="launch_ready_template(0, 1, [5, 10])"
-          ng-disabled="state.launch"
-        >
-        Add Job
-        <div class="md-ripple-container" style=""></div></button>
+        <form class='form-inline'>
+          <label>Blood Identifier: </label>
+          </br>
+          <input type='number'
+                 ng-model="autolaunch_params[0]"
+                 placeholder="BLOOD ID"
+                 class="input-small"
+                 focused-when="!autolaunch_params[0]">
+          </br></br>
+          <label>Kit Identifier: </label>
+          </br>
+          <input type='number'
+                 ng-model="autolaunch_params[1]"
+                 placeholder="KIT ID"
+                 class="input-small">
+          </br></br>
+          <a href="#"
+             class="md-raised md-button md-ink-ripple"
+             ng-click="launch_ola_workflow(autolaunch_params);"
+             ng-disabled="state.launch || !autolaunch_params[0] || !autolaunch_params[1]">
+            Submit
+          </a>
+        </form>
         <p>{{state.message}}<p>
         <br />
       </div>

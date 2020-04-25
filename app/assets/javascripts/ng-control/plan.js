@@ -681,9 +681,74 @@
               "or outputs was found to be invalid after saving.";
           }
         })
+      }
+
+      $scope.autolaunch_params = []
+      $scope.autolaunch_template_idx = 0;
+      $scope.autolaunch_budget_id = 1;
+
+      $scope.ola_launch_check_dialogue = function(params) {
+        return new Promise(function(resolve, reject) {
+          var dialog1 = $mdDialog
+            .confirm()
+            .title("Almost Done.")
+            .textContent(
+              'Do not proceed unless you are certain that the IDs are correctly entered. \n'
+            )
+            .ariaLabel("Almost Done.")
+            .ok("Continue")
+            .cancel("Abort")
+            .clickOutsideToClose(true);
+
+          var dialog2 = $mdDialog
+            .confirm()
+            .title("Is this correct?")
+            .textContent(
+              "BLOOD SAMPLE ID:\t\t" + params[0]
+            )
+            .ariaLabel("Confirm")
+            .ok("Confirm")
+            .cancel("Abort")
+            .clickOutsideToClose(true);
+
+
+          var dialog3 = $mdDialog
+            .confirm()
+            .title("Is this correct?")
+            .textContent(
+              "KIT ID:\t\t" + params[0]
+            )
+            .ariaLabel("Is this correct?")
+            .ok("Confirm")
+            .cancel("Abort")
+            .clickOutsideToClose(true);
+
+          // TODO don't use reject for this.
+          var fail = 'ID was not confirmed by user'
+          $mdDialog.show(dialog1)
+          .then(() => {
+            $mdDialog.show(dialog2)
+            .then(() => {
+              $mdDialog.show(dialog3)
+              .then(() => resolve(), () => reject(fail));
+            }
+            , () => reject(fail));
+          }
+          , () => reject(fail));
+        });
+      }
+
+      $scope.launch_ola_workflow = function(params) {
+        let budget_id = 1;
+        let template_idx = 0;
+        $scope.ola_launch_check_dialogue(params).then(() => {
+          $scope.launch_ready_template(template_idx, budget_id, params);
+        })
         .finally(() => {
           $scope.state.launch = false;
           $scope.new(false);
+          $scope.autolaunch_params = [];
+          $scope.$apply();
         });
       }
 
