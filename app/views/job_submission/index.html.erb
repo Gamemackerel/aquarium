@@ -6,6 +6,8 @@
 
 <% content_for :no_specific_padding do %>true<% end %>
 
+<% content_for :keydown do %>keyDown($event)<% end %>
+
 
 <% content_for :main do %>
 
@@ -21,7 +23,8 @@
     </div>
   </div>  
 
-  <div flex layout-padding ng-if="ready">
+  <div flex layout-padding ng-if="ready && !submitting">
+
     <div layout="row">
       <div flex="34"></div>
       <div flex="66">
@@ -49,7 +52,7 @@
           </br></br>
           <a href="#"
              class="md-raised md-button md-ink-ripple"
-             ng-click="launch_ola_workflow(autolaunch_params);"
+             ng-click="((state.launch || !autolaunch_params[0] || !autolaunch_params[1]) ? {} : autolaunch_submit())"
              ng-disabled="state.launch || !autolaunch_params[0] || !autolaunch_params[1]">
             Submit
           </a>
@@ -59,5 +62,64 @@
       </div>
     </div>
   </div>  
+
+   <div flex layout-padding ng-if="ready && submitting">
+
+    <div layout="row">
+      <div flex="34"></div>
+      <div flex="66">
+        <h4>
+          Double Check the IDs
+        </h4>
+        <p>
+          Do not enter the wrong IDs. Visually check both entered IDs against the physical labels before continuing.
+        </p>
+        <form class='form-inline'>
+          <label style="width: 4em;"><u><b>Blood</b></u></label> 
+          <input type='number'
+                 disabled
+                 ng-model="autolaunch_params[0]"
+                 placeholder="BLOOD ID"
+                 class="input-small"
+                 focused-when="!autolaunch_params[0]"
+                 style="
+                    background-color: red;
+                    font-weight: bolder;
+                    color: black;
+                    text-align: center;
+                    ">
+          </br></br>
+          <label style="width: 4em;"><u><b>Kit</b></u></label>
+          <input type='number'
+                 disabled
+                 ng-model="autolaunch_params[1]"
+                 placeholder="KIT ID"
+                 class="input-small"
+                 style="
+                    background-color: red;
+                    font-weight: bolder;
+                    color: black;
+                    text-align: center;
+                    ">
+          </br></br>
+          <a href="#"
+             class="md-raised md-button md-ink-ripple"
+             ng-click="autolaunch_reset()">
+            Cancel
+          </a>
+          <a href="#"
+             class="md-raised md-primary md-button md-ink-ripple"
+             ng-click="launch_ola_workflow(autolaunch_params)"
+             ng-disabled="state.launch || !autolaunch_params[0] || !autolaunch_params[1]"
+             ng-keydown="alert()"
+             autofocus>
+            Confirm
+          </a>
+        </form>
+        <p>{{state.message}}<p>
+        <br />
+      </div>
+    </div>
+  </div>
 
 <% end %>

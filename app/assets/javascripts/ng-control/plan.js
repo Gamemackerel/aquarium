@@ -680,12 +680,23 @@
               "Could not launch plan, because one or more inputs " +
               "or outputs was found to be invalid after saving.";
           }
-        })
+        });
+      };
+
+      $scope.autolaunch_submit = function() {
+        $scope.submitting = true;
       }
 
-      $scope.autolaunch_params = []
-      $scope.autolaunch_template_idx = 0;
-      $scope.autolaunch_budget_id = 1;
+      $scope.autolaunch_reset = function() {
+        $scope.submitting = false
+        $scope.state.launch = false;
+        $scope.new(false);
+        $scope.autolaunch_params = [];
+      }
+
+      $scope.autolaunch_params = [];
+      $scope.submitting = false;
+      $scope.
 
       $scope.ola_launch_check_dialogue = function(params) {
         return new Promise(function(resolve, reject) {
@@ -724,7 +735,7 @@
             .clickOutsideToClose(true);
 
           // TODO don't use reject for this.
-          var fail = 'ID was not confirmed by user'
+          var fail = 'ID was not confirmed by user';
           $mdDialog.show(dialog1)
           .then(() => {
             $mdDialog.show(dialog2)
@@ -736,21 +747,31 @@
           }
           , () => reject(fail));
         });
-      }
+      };
 
       $scope.launch_ola_workflow = function(params) {
-        let budget_id = 1;
-        let template_idx = 0;
-        $scope.ola_launch_check_dialogue(params).then(() => {
-          $scope.launch_ready_template(template_idx, budget_id, params);
-        })
+        let budget_id = 1; // TODO make into configurable constant
+        let template_idx = 0; // TODO make into configurable constant
+        $scope.launch_ready_template(template_idx, budget_id, params)
         .finally(() => {
-          $scope.state.launch = false;
-          $scope.new(false);
-          $scope.autolaunch_params = [];
-          $scope.$apply();
+          $scope.autolaunch_reset();
         });
-      }
+      };
+
+      $scope.keyDown = function(evt) {
+        console.log('HOWDY DOODLY');
+        switch (evt.key) {
+          case "End":
+            event.preventDefault();
+            console.log("end")
+            break;
+          case "Home":
+            event.preventDefault();
+            console.log("home")
+
+          default:
+        }
+      };
 
       // Inventory ////////////////////////////////////////////////////////////////////////////////////
 
