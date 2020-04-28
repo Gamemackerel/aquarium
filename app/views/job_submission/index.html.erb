@@ -41,19 +41,21 @@
                  ng-model="autolaunch_params[0]"
                  placeholder="BLOOD ID"
                  class="input-small"
-                 focused-when="!autolaunch_params[0]">
+                 focused-when="focus == 0">
           </br></br>
           <label>Kit Identifier: </label>
           </br>
           <input type='number'
                  ng-model="autolaunch_params[1]"
                  placeholder="KIT ID"
-                 class="input-small">
+                 class="input-small"
+                 focused-when="focus == 1">
           </br></br>
           <a href="#"
              class="md-raised md-button md-ink-ripple"
              ng-click="((state.launch || !autolaunch_params[0] || !autolaunch_params[1]) ? {} : autolaunch_submit())"
-             ng-disabled="state.launch || !autolaunch_params[0] || !autolaunch_params[1]">
+             ng-disabled="state.launch || !autolaunch_params[0] || !autolaunch_params[1]"
+             focused-when="focus == 2">
             Submit
           </a>
         </form>
@@ -81,7 +83,6 @@
                  ng-model="autolaunch_params[0]"
                  placeholder="BLOOD ID"
                  class="input-small"
-                 focused-when="!autolaunch_params[0]"
                  style="
                     background-color: red;
                     font-weight: bolder;
@@ -111,8 +112,7 @@
              class="md-raised md-primary md-button md-ink-ripple"
              ng-click="launch_ola_workflow(autolaunch_params)"
              ng-disabled="state.launch || !autolaunch_params[0] || !autolaunch_params[1]"
-             ng-keydown="alert()"
-             autofocus>
+             focused-when="submitting">
             Confirm
           </a>
         </form>

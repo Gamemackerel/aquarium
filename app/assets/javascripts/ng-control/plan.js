@@ -688,15 +688,15 @@
       }
 
       $scope.autolaunch_reset = function() {
+        $scope.focus = 0;
         $scope.submitting = false
         $scope.state.launch = false;
         $scope.new(false);
         $scope.autolaunch_params = [];
       }
 
-      $scope.autolaunch_params = [];
-      $scope.submitting = false;
-      $scope.
+      $scope.autolaunch_reset();
+      $scope.focus = -1; // required on first load to get around existing autofocus machinery
 
       $scope.ola_launch_check_dialogue = function(params) {
         return new Promise(function(resolve, reject) {
@@ -763,11 +763,26 @@
         switch (evt.key) {
           case "End":
             event.preventDefault();
-            console.log("end")
+            if($scope.submitting) {
+              $scope.autolaunch_reset();
+            } else if ($scope.focus != 0) {
+              $scope.focus--;
+              $scope.autolaunch_params[$scope.focus] = null
+            }
             break;
           case "Home":
             event.preventDefault();
-            console.log("home")
+            if ($scope.submitting) {
+              $scope.launch_ola_workflow($scope.autolaunch_params);
+            } else if ($scope.focus == -1 || $scope.autolaunch_params[$scope.focus]) {
+              if ($scope.focus == 1) {
+                $scope.focus = null;
+                $scope.autolaunch_submit();
+              } else {
+                $scope.focus++;
+                $scope.autolaunch_params[$scope.focus] = null
+              }
+            }
 
           default:
         }
