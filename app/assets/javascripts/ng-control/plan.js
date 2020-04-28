@@ -567,7 +567,7 @@
 
       $scope.submit_plan = function() {
         $scope.state.planning = true;
-        $scope.plan
+        return $scope.plan
           .submit()
           .then(() => {
             $scope.state.planning = false;
@@ -673,8 +673,7 @@
           $scope.plan = saved_plan;
           $scope.plan.uba = {budget_id: budget_id}
           if ($scope.plan.valid()) {
-            $scope.submit_plan();
-            $scope.state.message = "Submitted plan " + $scope.plan.id 
+            return $scope.submit_plan();
           } else {
             $scope.state.message =
               "Could not launch plan, because one or more inputs " +
@@ -684,6 +683,7 @@
       };
 
       $scope.autolaunch_submit = function() {
+        $scope.focus = null;
         $scope.submitting = true;
       }
 
@@ -698,68 +698,20 @@
       $scope.autolaunch_reset();
       $scope.focus = -1; // required on first load to get around existing autofocus machinery
 
-      $scope.ola_launch_check_dialogue = function(params) {
-        return new Promise(function(resolve, reject) {
-          var dialog1 = $mdDialog
-            .confirm()
-            .title("Almost Done.")
-            .textContent(
-              'Do not proceed unless you are certain that the IDs are correctly entered. \n'
-            )
-            .ariaLabel("Almost Done.")
-            .ok("Continue")
-            .cancel("Abort")
-            .clickOutsideToClose(true);
-
-          var dialog2 = $mdDialog
-            .confirm()
-            .title("Is this correct?")
-            .textContent(
-              "BLOOD SAMPLE ID:\t\t" + params[0]
-            )
-            .ariaLabel("Confirm")
-            .ok("Confirm")
-            .cancel("Abort")
-            .clickOutsideToClose(true);
-
-
-          var dialog3 = $mdDialog
-            .confirm()
-            .title("Is this correct?")
-            .textContent(
-              "KIT ID:\t\t" + params[0]
-            )
-            .ariaLabel("Is this correct?")
-            .ok("Confirm")
-            .cancel("Abort")
-            .clickOutsideToClose(true);
-
-          // TODO don't use reject for this.
-          var fail = 'ID was not confirmed by user';
-          $mdDialog.show(dialog1)
-          .then(() => {
-            $mdDialog.show(dialog2)
-            .then(() => {
-              $mdDialog.show(dialog3)
-              .then(() => resolve(), () => reject(fail));
-            }
-            , () => reject(fail));
-          }
-          , () => reject(fail));
-        });
-      };
-
       $scope.launch_ola_workflow = function(params) {
         let budget_id = 1; // TODO make into configurable constant
         let template_idx = 0; // TODO make into configurable constant
         $scope.launch_ready_template(template_idx, budget_id, params)
+        .then(() => {
+          $scope.plan.debug();
+          $scope.state.message = "Launched plan " + $scope.plan.id
+        })
         .finally(() => {
           $scope.autolaunch_reset();
         });
       };
 
       $scope.keyDown = function(evt) {
-        console.log('HOWDY DOODLY');
         switch (evt.key) {
           case "End":
             event.preventDefault();
@@ -776,7 +728,6 @@
               $scope.launch_ola_workflow($scope.autolaunch_params);
             } else if ($scope.focus == -1 || $scope.autolaunch_params[$scope.focus]) {
               if ($scope.focus == 1) {
-                $scope.focus = null;
                 $scope.autolaunch_submit();
               } else {
                 $scope.focus++;
