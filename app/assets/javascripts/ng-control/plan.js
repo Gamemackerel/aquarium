@@ -713,7 +713,7 @@
 
       $scope.keyDown = function(evt) {
         switch (evt.key) {
-          case "End":
+          case "Home":
             event.preventDefault();
             if($scope.submitting) {
               $scope.autolaunch_reset();
@@ -722,7 +722,7 @@
               $scope.autolaunch_params[$scope.focus] = null
             }
             break;
-          case "Home":
+          case "End":
             event.preventDefault();
             if ($scope.submitting) {
               $scope.launch_ola_workflow($scope.autolaunch_params);
