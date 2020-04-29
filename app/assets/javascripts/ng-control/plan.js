@@ -699,16 +699,18 @@
       $scope.focus = -1; // required on first load to get around existing autofocus machinery
 
       $scope.launch_ola_workflow = function(params) {
-        let budget_id = 1; // TODO make into configurable constant
-        let template_idx = 0; // TODO make into configurable constant
-        $scope.launch_ready_template(template_idx, budget_id, params)
-        .then(() => {
-          $scope.plan.debug();
-          $scope.state.message = "Launched plan " + $scope.plan.id
-        })
-        .finally(() => {
-          $scope.autolaunch_reset();
-        });
+        if(!$scope.state.launch) {
+          let budget_id = 1; // TODO make into configurable constant
+          let template_idx = 0; // TODO make into configurable constant
+          $scope.launch_ready_template(template_idx, budget_id, params)
+          .then(() => {
+            $scope.plan.debug();
+            $scope.state.message = "Launched plan " + $scope.plan.id
+          })
+          .finally(() => {
+            $scope.autolaunch_reset();
+          });
+        }
       };
 
       $scope.keyDown = function(evt) {
@@ -717,7 +719,7 @@
             event.preventDefault();
             if($scope.submitting) {
               $scope.autolaunch_reset();
-            } else if ($scope.focus != 0) {
+            } else if ($scope.focus > 0) {
               $scope.focus--;
               $scope.autolaunch_params[$scope.focus] = null
             }
