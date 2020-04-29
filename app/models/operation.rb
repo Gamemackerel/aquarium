@@ -249,6 +249,13 @@ class Operation < ActiveRecord::Base
     end
   end
 
+  def recurse_up(&block)
+    block.call(self)
+    self.successors.each do |successor|
+      successor.recurse_up(&block)
+    end
+  end
+
   def find(name)
     ops = []
     recurse do |op|
