@@ -111,7 +111,7 @@
           <a href="#"
              class="md-raised md-primary md-button md-ink-ripple"
              ng-click="launch_ola_workflow(autolaunch_params)"
-             ng-disabled="state.launch || !autolaunch_params[0] || !autolaunch_params[1]"
+             ng-disabled="!submitting || launching || !autolaunch_params[0] || !autolaunch_params[1]"
              focused-when="submitting">
             Confirm
           </a>

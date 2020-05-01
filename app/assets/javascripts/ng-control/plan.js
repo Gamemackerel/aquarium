@@ -657,7 +657,7 @@
       // launch a system template by applying the given params array
       // to the respective input field values of the first operation
       $scope.launch_ready_template = function(template_idx, budget_id, params) {
-        $scope.state.launch = true;
+        $scope.launching = true;
         p = $scope.system_templates[template_idx];
         $scope.new(false);
         return $scope.paste_plan(p)
@@ -675,9 +675,10 @@
           if ($scope.plan.valid()) {
             return $scope.submit_plan();
           } else {
-            $scope.state.message =
+            throw(
               "Could not launch plan, because one or more inputs " +
-              "or outputs was found to be invalid after saving.";
+              "or outputs was found to be invalid after saving."
+            );
           }
         });
       };
@@ -689,23 +690,28 @@
 
       $scope.autolaunch_reset = function() {
         $scope.focus = 0;
-        $scope.submitting = false
-        $scope.state.launch = false;
-        $scope.new(false);
         $scope.autolaunch_params = [];
+        $scope.submitting = false
+        $scope.launching = false;
+        $scope.new(false);
       }
 
       $scope.autolaunch_reset();
       $scope.focus = -1; // required on first load to get around existing autofocus machinery
 
       $scope.launch_ola_workflow = function(params) {
-        if(!$scope.state.launch) {
+        if(!$scope.state.launch && $scope.submitting) {
           let budget_id = 1; // TODO make into configurable constant
           let template_idx = 0; // TODO make into configurable constant
           $scope.launch_ready_template(template_idx, budget_id, params)
           .then(() => {
-            $scope.plan.debug();
-            $scope.state.message = "Launched plan " + $scope.plan.id
+            return $scope.plan.debug(); // executes first operation which sets up items
+          })
+          .then(plan => {
+            $scope.state.message = "Submitted plan " + $scope.plan.id
+          })
+          .catch(errors => {
+            $scope.state.message = errors.toString();
           })
           .finally(() => {
             $scope.autolaunch_reset();
