@@ -277,6 +277,11 @@
       };
 
       $scope.ok = function() {
+        // if all finished, return to technician view or manager
+        if ($scope.job.backtrace.complete) {
+          window.location.href = "/technician_dashboard";
+          return
+        }
         $scope.job.advance().then(() => {
           if (
             $scope.job.backtrace.last.timer &&
