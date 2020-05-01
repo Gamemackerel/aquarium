@@ -397,6 +397,9 @@ AQ.Plan.record_methods.debug = function() {
       plan.reload();
       plan.debugging = false;
       plan.recompute_getter("state");
+      if (response.data.errors.length > 0) {
+        throw(response.data.errors);
+      }
     })
     .then(() => plan);
 };

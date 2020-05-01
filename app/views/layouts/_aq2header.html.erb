@@ -94,6 +94,12 @@
         </div>
       </div>
 
+      <md-button href="/job_submission" aria-label="Submit Jobs"
+                 class="main-button <%= yield(:title) == 'OLASimple Sample Ingestion' ? 'underlined' : '' %>">
+        <%= link_to "Submit Jobs", '/job_submission' %>
+      </md-button>
+
+
       <md-button href="/plans" aria-label="Designer" 
                  class="main-button <%= yield(:title) == 'Designer' ? 'underlined' : '' %>">
         <%= link_to "Designer", plans_path %>

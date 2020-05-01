@@ -395,10 +395,10 @@
         }
       };
 
-      function switch_plan() {
+      function switch_plan(careful) {
         return new Promise(function(resolve, reject) {
           // TODO: change to depend on whether plan is changed
-          if ($scope.plan.operations.length > 0) {
+          if ($scope.plan.operations.length > 0 && careful) {
             var dialog = $mdDialog
               .confirm()
               .title("Switch plans?")
@@ -463,7 +463,7 @@
       };
 
       $scope.load = function(plan) {
-        switch_plan().then(() => load_aux(plan));
+        switch_plan(true).then(() => load_aux(plan));
       };
 
       $scope.paste_plan = function(plan) {
@@ -472,7 +472,7 @@
 
         $scope.clear_multiselect();
 
-        AQ.Plan.load(plan.id).then(p => {
+        return AQ.Plan.load(plan.id).then(p => {
           Module.next_module_id = temp1;
           ModuleIO.next_io_id = temp2;
           $scope.plan.paste_plan(p, $scope.last_place);
@@ -482,8 +482,8 @@
         });
       };
 
-      $scope.new = function() {
-        switch_plan().then(() => {
+      $scope.new = function(careful) {
+        switch_plan(careful).then(() => {
           AQ.User.current()
             .then(user => {
               $scope.current_user = user;
@@ -567,7 +567,7 @@
 
       $scope.submit_plan = function() {
         $scope.state.planning = true;
-        $scope.plan
+        return $scope.plan
           .submit()
           .then(() => {
             $scope.state.planning = false;
@@ -650,6 +650,100 @@
             aq.remove($scope.folders, name);
             $scope.$apply();
           });
+        }
+      };
+
+      // Added for OLASimple aquarium
+      // launch a system template by applying the given params array
+      // to the respective input field values of the first operation
+      $scope.launch_ready_template = function(template_idx, budget_id, params) {
+        $scope.launching = true;
+        p = $scope.system_templates[template_idx];
+        $scope.new(false);
+        return $scope.paste_plan(p)
+        .then(() => {
+          $scope.plan.name = p.name + " - Autolaunch"
+          let leaves = $scope.plan.leaves;
+          for (var i = 0; i < leaves.length; i++) {
+            leaves[i].value = params[i]
+          }
+          return $scope.plan.save($scope.current_user)
+        })
+        .then(saved_plan => {
+          $scope.plan = saved_plan;
+          $scope.plan.uba = {budget_id: budget_id}
+          if ($scope.plan.valid()) {
+            return $scope.submit_plan();
+          } else {
+            throw(
+              "Could not launch plan, because one or more inputs " +
+              "or outputs was found to be invalid after saving."
+            );
+          }
+        });
+      };
+
+      $scope.autolaunch_submit = function() {
+        $scope.focus = null;
+        $scope.submitting = true;
+      }
+
+      $scope.autolaunch_reset = function() {
+        $scope.focus = 0;
+        $scope.autolaunch_params = [];
+        $scope.submitting = false
+        $scope.launching = false;
+        $scope.new(false);
+      }
+
+      $scope.autolaunch_reset();
+      $scope.focus = -1; // required on first load to get around existing autofocus machinery
+
+      $scope.launch_ola_workflow = function(params) {
+        if(!$scope.state.launch && $scope.submitting) {
+          let budget_id = 1; // TODO make into configurable constant
+          let template_idx = 0; // TODO make into configurable constant
+          $scope.launch_ready_template(template_idx, budget_id, params)
+          .then(() => {
+            return $scope.plan.debug(); // executes first operation which sets up items
+          })
+          .then(plan => {
+            $scope.state.message = "Submitted plan " + $scope.plan.id
+          })
+          .catch(errors => {
+            $scope.state.message = errors.toString();
+          })
+          .finally(() => {
+            $scope.autolaunch_reset();
+          });
+        }
+      };
+
+      $scope.keyDown = function(evt) {
+        switch (evt.key) {
+          case "Home":
+            event.preventDefault();
+            if($scope.submitting) {
+              $scope.autolaunch_reset();
+            } else if ($scope.focus > 0) {
+              $scope.focus--;
+              $scope.autolaunch_params[$scope.focus] = null
+            }
+            break;
+          case "End":
+            event.preventDefault();
+            if ($scope.submitting) {
+              $scope.launch_ola_workflow($scope.autolaunch_params);
+            } else if ($scope.focus == -1 || $scope.autolaunch_params[$scope.focus]) {
+              if ($scope.focus == 1) {
+                $scope.autolaunch_submit();
+              } else {
+                $scope.focus++;
+                $scope.autolaunch_params[$scope.focus] = null
+              }
+            }
+
+          default:
         }
       };
 

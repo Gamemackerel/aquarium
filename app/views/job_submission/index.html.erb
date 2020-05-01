@@ -1,0 +1,125 @@
+<% provide(:title,  "OLASimple Sample Ingestion" ) %>
+
+<% content_for :controller do %>planCtrl<% end %>
+<% content_for :class do %>plans launcher<% end %>
+
+
+<% content_for :no_specific_padding do %>true<% end %>
+
+<% content_for :keydown do %>keyDown($event)<% end %>
+
+
+<% content_for :main do %>
+
+  <div flex layout-padding ng-if="!ready">
+    <div layout="row">
+      <div flex="34"></div>
+      <div flex="66">
+        <br /><br />
+        <h2 class="md-title">Loading...</h2>
+        <md-progress-linear md-mode="indeterminate"></md-progress-linear>
+        <br />
+      </div>
+    </div>
+  </div>  
+
+  <div flex layout-padding ng-if="ready && !submitting">
+
+    <div layout="row">
+      <div flex="34"></div>
+      <div flex="66">
+        <h4>
+          Initiate OLASimple Job
+        </h4>
+        <p>
+          
+        </p>
+        <form class='form-inline'>
+          <label>Blood Identifier: </label>
+          </br>
+          <input type='number'
+                 ng-model="autolaunch_params[0]"
+                 placeholder="BLOOD ID"
+                 class="input-small"
+                 focused-when="focus == 0">
+          </br></br>
+          <label>Kit Identifier: </label>
+          </br>
+          <input type='number'
+                 ng-model="autolaunch_params[1]"
+                 placeholder="KIT ID"
+                 class="input-small"
+                 focused-when="focus == 1">
+          </br></br>
+          <a href="#"
+             class="md-raised md-button md-ink-ripple"
+             ng-click="((state.launch || !autolaunch_params[0] || !autolaunch_params[1]) ? {} : autolaunch_submit())"
+             ng-disabled="state.launch || !autolaunch_params[0] || !autolaunch_params[1]"
+             focused-when="focus == 2">
+            Submit
+          </a>
+        </form>
+        <p>{{state.message}}<p>
+        <br />
+      </div>
+    </div>
+  </div>  
+
+   <div flex layout-padding ng-if="ready && submitting">
+
+    <div layout="row">
+      <div flex="34"></div>
+      <div flex="66">
+        <h4>
+          Double Check the IDs
+        </h4>
+        <p>
+          Do not enter the wrong IDs. Visually check both entered IDs against the physical labels before continuing.
+        </p>
+        <form class='form-inline'>
+          <label style="width: 4em;"><u><b>Blood</b></u></label> 
+          <input type='number'
+                 disabled
+                 ng-model="autolaunch_params[0]"
+                 placeholder="BLOOD ID"
+                 class="input-small"
+                 style="
+                    background-color: red;
+                    font-weight: bolder;
+                    color: black;
+                    text-align: center;
+                    ">
+          </br></br>
+          <label style="width: 4em;"><u><b>Kit</b></u></label>
+          <input type='number'
+                 disabled
+                 ng-model="autolaunch_params[1]"
+                 placeholder="KIT ID"
+                 class="input-small"
+                 style="
+                    background-color: blue;
+                    font-weight: bolder;
+                    color: white;
+                    text-align: center;
+                    ">
+          </br></br>
+          <a href="#"
+             class="md-raised md-button md-ink-ripple"
+             ng-click="autolaunch_reset()">
+            Cancel
+          </a>
+          <a href="#"
+             class="md-raised md-primary md-button md-ink-ripple"
+             ng-click="launch_ola_workflow(autolaunch_params)"
+             ng-disabled="!submitting || launching || !autolaunch_params[0] || !autolaunch_params[1]"
+             focused-when="submitting">
+            Confirm
+          </a>
+        </form>
+        <p>{{state.message}}<p>
+        <br />
+      </div>
+    </div>
+  </div>
+
+<% end %>

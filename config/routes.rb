@@ -53,6 +53,7 @@ Bioturk::Application.routes.draw do
   get '/operations/:id/retry',                   to: 'operations#retry'
   resources :operations
 
+  resources :job_submission, only: [:index]
   resources :technician_dashboard, only: [:index]
 
   get '/operation_types/test_all', to: 'operation_types#test_all'
