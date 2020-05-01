@@ -1,0 +1,45 @@
+<body>
+<h2 id="runningaquariumwithdocker">Running OLASimple Aquarium with Docker</h2>
+<p>Run OLASimple Aquarium locally on your computer using Docker:</p>
+<ol>
+<li><p>Install <a href="https://www.docker.com/get-started">Docker</a> on your computer.</p></li>
+
+<li><p>Download Abe's aquarium fork (requires <a href="https://git-scm.com/">git</a> on the terminal)</p>
+	<pre><code>git clone https://github.com/Gamemackerel/aquarium.git</code></pre></li>
+
+<li><p>Switch to the right branch. First, change into the <code>aquarium</code> directory</p>
+<pre><code class="bash language-bash hljs code-block"><span class="hljs-built_in">cd</span> aquarium
+</code></pre>
+<p>then switch to the OLASimple branch</p>
+<pre><code>git checkout ola-simple</code></pre>
+</li>
+
+<li><p>Build the docker images by runing the command</p>
+<pre><code class="bash language-bash hljs code-block">docker-compose build
+</code></pre></li>
+<li><p>Start the container. On non-Windows platforms (e.g. MacOS or Linux), run the command</p>
+<pre><code class="bash language-bash hljs code-block">docker-compose up
+</code></pre>
+<p>to start the services for Aquarium.</p>
+<blockquote>
+  <p><strong>Important</strong>:
+  The first run initializes the database, and so will be slower than subsequent runs.
+  This can take longer than you think is reasonable, but let it finish unmolested.</p>
+</blockquote>
+<p>On Windows, instead use the command</p>
+<pre><code class="bash language-bash hljs code-block">docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.windows.yml up
+</code></pre></li>
+<li><p>Check that everything is working. Once all of the services for Aquarium have started, visit <code>localhost</code> with the Chrome browser to find the Aquarium login page.
+If running Aquarium inside the Docker toolbox VM, the address will be instead be <code>192.168.99.100</code>.
+When started using the default database, aquarium has a single user with login <code>neptune</code> and password <code>aquarium</code>.</p>
+<p>If you get errors during startup after doing a build, you may need to run</p>
+<pre><code class="bash language-bash hljs code-block">docker-compose pull --ignore-pull-failures
+docker-compose build --no-cache
+</code></pre>
+<p>And, if that doesn't work, let Abe know.</p></li>
+</ol>
+<h2 id="stoppingaquariumindocker">Stopping Aquarium in Docker</h2>
+<p>To halt the Aquarium services, first type <code>ctrl-c</code> in the terminal to stop the running containers, then remove the containers by running</p>
+<pre><code class="bash language-bash hljs code-block">docker-compose down
+</code></pre>
+</body>
